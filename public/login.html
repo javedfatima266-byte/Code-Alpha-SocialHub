@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — SocialHub</title>
+  <meta name="description" content="Sign in to your SocialHub account to share posts, like, and follow friends.">
+  <meta property="og:title" content="Sign In — SocialHub">
+  <meta property="og:description" content="Sign in to your SocialHub account to share posts, like, and follow friends.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('socialhub_theme') || 'system';
+        var effective = t;
+        if (t === 'system') {
+          effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', effective);
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body style="min-height: 100vh; display: flex; flex-direction: column; background-color: var(--bg-base);">
+
+  <!-- Auth Minimal Navbar -->
+  <header class="auth-header">
+    <a href="/index.html" class="auth-header-brand">
+      <div class="brand-icon-box" style="width: 32px; height: 32px;">
+        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M18 8a3 3 0 1 0-2.83-4H8.83a3 3 0 1 0 0 16h6.34A3 3 0 1 0 18 16a2.98 2.98 0 0 0-1.83.63l-5.34-3.11a3.06 3.06 0 0 0 0-3.04l5.34-3.11A2.98 2.98 0 0 0 18 8z"/></svg>
+      </div>
+      <span>SocialHub</span>
+    </a>
+    <div class="auth-header-actions">
+      <button type="button" class="theme-toggle-action btn btn-outline btn-sm" aria-label="Appearance & Themes" title="Change Theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;">
+          <circle cx="13.5" cy="6.5" r="1" fill="currentColor"></circle>
+          <circle cx="17.5" cy="10.5" r="1" fill="currentColor"></circle>
+          <circle cx="8.5" cy="7.5" r="1" fill="currentColor"></circle>
+          <circle cx="6.5" cy="12.5" r="1" fill="currentColor"></circle>
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"></path>
+        </svg>
+        <span>Theme</span>
+      </button>
+      <a href="/register.html" class="btn btn-primary btn-sm">Create Account</a>
+    </div>
+  </header>
+
+  <!-- Modern Balanced Split Authentication Card -->
+  <main class="auth-layout">
+    <div class="auth-split-card">
+      <!-- LEFT BRAND PANEL (Desktop Benefits) -->
+      <div class="auth-split-left">
+        <div class="auth-brand-logo-row">
+          <div class="brand-icon-box" style="width: 40px; height: 40px;">
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path d="M18 8a3 3 0 1 0-2.83-4H8.83a3 3 0 1 0 0 16h6.34A3 3 0 1 0 18 16a2.98 2.98 0 0 0-1.83.63l-5.34-3.11a3.06 3.06 0 0 0 0-3.04l5.34-3.11A2.98 2.98 0 0 0 18 8z"/></svg>
+          </div>
+          <span class="auth-brand-title">SocialHub</span>
+        </div>
+
+        <p class="auth-brand-tagline">
+          Connect, share, and discover with your community.
+        </p>
+
+        <ul class="auth-benefits-list">
+          <li class="auth-benefit-item">
+            <span class="auth-benefit-check" aria-hidden="true">✓</span>
+            <span>Share your thoughts and photos</span>
+          </li>
+          <li class="auth-benefit-item">
+            <span class="auth-benefit-check" aria-hidden="true">✓</span>
+            <span>Connect with people</span>
+          </li>
+          <li class="auth-benefit-item">
+            <span class="auth-benefit-check" aria-hidden="true">✓</span>
+            <span>Join meaningful conversations</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- RIGHT FORM PANEL -->
+      <div class="auth-split-right">
+        <div class="auth-mobile-brand">
+          <div class="brand-icon-box" style="width: 32px; height: 32px;">
+            <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M18 8a3 3 0 1 0-2.83-4H8.83a3 3 0 1 0 0 16h6.34A3 3 0 1 0 18 16a2.98 2.98 0 0 0-1.83.63l-5.34-3.11a3.06 3.06 0 0 0 0-3.04l5.34-3.11A2.98 2.98 0 0 0 18 8z"/></svg>
+          </div>
+          <span style="font-weight: 800; font-size: 1.2rem; color: var(--text-primary);">SocialHub</span>
+        </div>
+
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to your account to share posts and join discussions.</p>
+
+        <div id="login-error-alert" class="alert-box alert-box-danger" style="display: none;" role="alert"></div>
+
+        <form id="login-form" class="auth-form">
+          <div class="form-field-group">
+            <label class="form-field-label" for="login-identifier">Email or Username</label>
+            <input type="text" id="login-identifier" class="form-field-input" placeholder="name@example.com or username" required autofocus autocomplete="username">
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-field-label" for="login-password">Password</label>
+            <div class="form-input-box">
+              <input type="password" id="login-password" class="form-field-input" placeholder="••••••••" required autocomplete="current-password" style="padding-right: 2.75rem;">
+              <button type="button" id="toggle-password-visibility" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                <svg class="eye-icon-show" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-icon-hide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="login-submit-btn" class="auth-submit-btn">
+            Sign In
+          </button>
+        </form>
+
+        <div class="auth-footer-link">
+          Don't have an account? <a href="/register.html">Create account</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (getCurrentUser()) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      const form = document.getElementById('login-form');
+      const errorAlert = document.getElementById('login-error-alert');
+      const submitBtn = document.getElementById('login-submit-btn');
+      const passwordInput = document.getElementById('login-password');
+      const togglePasswordBtn = document.getElementById('toggle-password-visibility');
+
+      if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', () => {
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+          const newLabel = isPassword ? 'Hide password' : 'Show password';
+          togglePasswordBtn.setAttribute('aria-label', newLabel);
+          togglePasswordBtn.setAttribute('title', newLabel);
+          const showIcon = togglePasswordBtn.querySelector('.eye-icon-show');
+          const hideIcon = togglePasswordBtn.querySelector('.eye-icon-hide');
+          if (showIcon && hideIcon) {
+            showIcon.style.display = isPassword ? 'none' : 'block';
+            hideIcon.style.display = isPassword ? 'block' : 'none';
+          }
+        });
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorAlert.style.display = 'none';
+
+        const identifier = document.getElementById('login-identifier').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!identifier || !password) {
+          errorAlert.textContent = 'Please provide both email/username and password.';
+          errorAlert.style.display = 'block';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Signing in...';
+
+        try {
+          const res = await apiFetch('/api/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: identifier.includes('@') ? identifier : undefined,
+              username: !identifier.includes('@') ? identifier : undefined,
+              password
+            })
+          });
+
+          if (res.ok && res.data.success) {
+            setAuthSession(res.data.data.token, res.data.data.user);
+            showToast('Welcome back, ' + (res.data.data.user.name || res.data.data.user.username) + '!', 'success');
+            setTimeout(() => {
+              window.location.href = '/index.html';
+            }, 400);
+          } else {
+            errorAlert.textContent = res.data.message || 'Invalid credentials. Please check your username and password.';
+            errorAlert.style.display = 'block';
+          }
+        } catch (err) {
+          errorAlert.textContent = 'Network error connecting to the server. Please try again.';
+          errorAlert.style.display = 'block';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

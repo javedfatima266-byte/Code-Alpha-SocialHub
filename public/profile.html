@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile — SocialHub</title>
+  <meta name="description" content="View profile, bio, followers, following, and published posts on SocialHub.">
+  <meta property="og:title" content="User Profile — SocialHub">
+  <meta property="og:description" content="View profile, bio, followers, following, and published posts on SocialHub.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('socialhub_theme') || 'system';
+        var effective = t;
+        if (t === 'system') {
+          effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', effective);
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- App Shell Layout -->
+  <div class="app-shell">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="app-sidebar-left" aria-label="Main Navigation">
+      <div style="display: flex; flex-direction: column;">
+        <a href="/index.html" class="sidebar-brand">
+          <div class="brand-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M18 8a3 3 0 1 0-2.83-4H8.83a3 3 0 1 0 0 16h6.34A3 3 0 1 0 18 16a2.98 2.98 0 0 0-1.83.63l-5.34-3.11a3.06 3.06 0 0 0 0-3.04l5.34-3.11A2.98 2.98 0 0 0 18 8z"/></svg>
+          </div>
+          <div class="brand-text-block">
+            <span class="brand-name">SocialHub</span>
+            <span class="brand-tagline">Open Community</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Items -->
+        <ul class="sidebar-nav-list" id="sidebar-nav">
+          <li class="sidebar-nav-item">
+            <a href="/index.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="/explore.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+              </svg>
+              <span>Explore</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="/profile.html" class="active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+
+        <a href="/index.html?focus=composer" class="sidebar-cta-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Post</span>
+        </a>
+      </div>
+
+      <!-- Footer: 6-Theme Visual Selector & User Pill -->
+      <div class="sidebar-footer">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <div class="theme-section-header">
+            <span class="theme-section-title">Appearance</span>
+            <button type="button" class="theme-picker-open-btn theme-picker-trigger" onclick="openThemePickerModal()">All 6 ▾</button>
+          </div>
+          <div class="theme-selector-grid" aria-label="Theme selection">
+            <button type="button" class="theme-card-option" data-theme-name="light" title="Light theme">
+              <div class="theme-swatch-circle theme-swatch-light"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Light</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="dark" title="Dark theme">
+              <div class="theme-swatch-circle theme-swatch-dark"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Dark</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="midnight" title="Midnight theme">
+              <div class="theme-swatch-circle theme-swatch-midnight"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Midnight</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="ocean" title="Ocean theme">
+              <div class="theme-swatch-circle theme-swatch-ocean"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Ocean</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="lavender" title="Lavender theme">
+              <div class="theme-swatch-circle theme-swatch-lavender"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Lavender</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="forest" title="Forest theme">
+              <div class="theme-swatch-circle theme-swatch-forest"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Forest</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="sidebar-user-pill">
+          <!-- Populated by /js/auth.js -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER COLUMN: Profile View -->
+    <main class="app-main-content">
+      <!-- Sticky Header -->
+      <header class="main-sticky-header">
+        <div class="mobile-top-bar">
+          <a href="/index.html" class="mobile-logo-wrap">
+            <div class="brand-icon-box" style="width: 32px; height: 32px;">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M18 8a3 3 0 1 0-2.83-4H8.83a3 3 0 1 0 0 16h6.34A3 3 0 1 0 18 16a2.98 2.98 0 0 0-1.83.63l-5.34-3.11a3.06 3.06 0 0 0 0-3.04l5.34-3.11A2.98 2.98 0 0 0 18 8z"/></svg>
+            </div>
+            <span>SocialHub</span>
+          </a>
+          <div class="mobile-actions-wrap">
+            <button type="button" class="mobile-header-btn theme-toggle-action" id="mobile-top-theme-btn" aria-label="Appearance & Themes" title="Change Theme">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="13.5" cy="6.5" r="1" fill="currentColor"></circle>
+                <circle cx="17.5" cy="10.5" r="1" fill="currentColor"></circle>
+                <circle cx="8.5" cy="7.5" r="1" fill="currentColor"></circle>
+                <circle cx="6.5" cy="12.5" r="1" fill="currentColor"></circle>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"></path>
+              </svg>
+            </button>
+            <a href="/login.html" class="mobile-header-btn" id="mobile-top-account-btn" aria-label="Account" title="Account">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <h1 class="main-header-title">Profile</h1>
+      </header>
+
+      <!-- Profile Header Area (Cover, Large Avatar, Bio & Metrics) -->
+      <div id="profile-content-area">
+        <div class="center-spinner">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+
+      <!-- About Section (Shown on About Tab) -->
+      <div id="user-about-section" style="display: none;"></div>
+
+      <!-- User's Posts Stream -->
+      <div class="posts-stream" id="user-posts-stream">
+        <div class="center-spinner">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="app-sidebar-right" aria-label="Sidebar Recommendations">
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Social Network</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+          Profiles reflect real-time follower counts, published posts, and comments powered by PostgreSQL relations.
+        </p>
+      </div>
+
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Suggested Creators</span>
+          <a href="/explore.html" style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Explore</a>
+        </div>
+        <div class="who-to-follow-list" id="who-to-follow-list">
+          <div class="center-spinner" style="padding: 1rem;"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Fullscreen Image Lightbox Modal -->
+  <div class="lightbox-modal" id="lightbox-modal" aria-hidden="true" role="dialog">
+    <button class="lightbox-close-btn" id="lightbox-close-btn" aria-label="Close image">&times;</button>
+    <img src="" alt="Full preview" class="lightbox-img" id="lightbox-img">
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <!-- Rendered dynamically by /js/auth.js -->
+  </nav>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/likes.js"></script>
+  <script src="/js/comments.js"></script>
+  <script src="/js/posts.js"></script>
+  <script src="/js/follow.js"></script>
+  <script src="/js/profile.js"></script>
+  <script src="/js/feed.js"></script>
+</body>
+</html>

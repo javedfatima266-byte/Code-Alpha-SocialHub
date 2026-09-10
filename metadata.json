@@ -1,0 +1,6 @@
+{
+  "name": "SocialHub",
+  "description": "A modern, lightweight full-stack mini social media platform built with Vanilla HTML5/CSS3/JavaScript, Express.js, and PostgreSQL.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

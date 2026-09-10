@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore People — SocialHub</title>
+  <meta name="description" content="Discover creators, developers and people in your community on SocialHub.">
+  <meta property="og:title" content="Explore People — SocialHub">
+  <meta property="og:description" content="Discover creators, developers and people in your community on SocialHub.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('socialhub_theme') || 'system';
+        var effective = t;
+        if (t === 'system') {
+          effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', effective);
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- App Shell Layout -->
+  <div class="app-shell">
+
+    <!-- LEFT SIDEBAR: Brand, Navigation & Session -->
+    <aside class="app-sidebar-left" aria-label="Main Navigation">
+      <div style="display: flex; flex-direction: column;">
+        <a href="/index.html" class="sidebar-brand">
+          <div class="brand-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M18 8a3 3 0 1 0-2.83-4H8.83a3 3 0 1 0 0 16h6.34A3 3 0 1 0 18 16a2.98 2.98 0 0 0-1.83.63l-5.34-3.11a3.06 3.06 0 0 0 0-3.04l5.34-3.11A2.98 2.98 0 0 0 18 8z"/></svg>
+          </div>
+          <div class="brand-text-block">
+            <span class="brand-name">SocialHub</span>
+            <span class="brand-tagline">Open Community</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Items -->
+        <ul class="sidebar-nav-list" id="sidebar-nav">
+          <li class="sidebar-nav-item">
+            <a href="/index.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="/explore.html" class="active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+              </svg>
+              <span>Explore</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="/profile.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+
+        <a href="/index.html?focus=composer" class="sidebar-cta-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Post</span>
+        </a>
+      </div>
+
+      <!-- Footer: 6-Theme Visual Selector & User Pill -->
+      <div class="sidebar-footer">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <div class="theme-section-header">
+            <span class="theme-section-title">Appearance</span>
+            <button type="button" class="theme-picker-open-btn theme-picker-trigger" onclick="openThemePickerModal()">All 6 ▾</button>
+          </div>
+          <div class="theme-selector-grid" aria-label="Theme selection">
+            <button type="button" class="theme-card-option" data-theme-name="light" title="Light theme">
+              <div class="theme-swatch-circle theme-swatch-light"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Light</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="dark" title="Dark theme">
+              <div class="theme-swatch-circle theme-swatch-dark"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Dark</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="midnight" title="Midnight theme">
+              <div class="theme-swatch-circle theme-swatch-midnight"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Midnight</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="ocean" title="Ocean theme">
+              <div class="theme-swatch-circle theme-swatch-ocean"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Ocean</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="lavender" title="Lavender theme">
+              <div class="theme-swatch-circle theme-swatch-lavender"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Lavender</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+            <button type="button" class="theme-card-option" data-theme-name="forest" title="Forest theme">
+              <div class="theme-swatch-circle theme-swatch-forest"><div class="theme-swatch-dot"></div></div>
+              <span class="theme-card-label">Forest</span>
+              <span class="theme-card-check">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="sidebar-user-pill">
+          <!-- Populated by /js/auth.js -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER COLUMN: Explore Content Area -->
+    <main class="app-main-content">
+      <!-- Sticky Header -->
+      <header class="main-sticky-header">
+        <div class="mobile-top-bar">
+          <a href="/index.html" class="mobile-logo-wrap">
+            <div class="brand-icon-box" style="width: 32px; height: 32px;">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M18 8a3 3 0 1 0-2.83-4H8.83a3 3 0 1 0 0 16h6.34A3 3 0 1 0 18 16a2.98 2.98 0 0 0-1.83.63l-5.34-3.11a3.06 3.06 0 0 0 0-3.04l5.34-3.11A2.98 2.98 0 0 0 18 8z"/></svg>
+            </div>
+            <span>SocialHub</span>
+          </a>
+          <div class="mobile-actions-wrap">
+            <button type="button" class="mobile-header-btn theme-toggle-action" id="mobile-top-theme-btn" aria-label="Appearance & Themes" title="Change Theme">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="13.5" cy="6.5" r="1" fill="currentColor"></circle>
+                <circle cx="17.5" cy="10.5" r="1" fill="currentColor"></circle>
+                <circle cx="8.5" cy="7.5" r="1" fill="currentColor"></circle>
+                <circle cx="6.5" cy="12.5" r="1" fill="currentColor"></circle>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"></path>
+              </svg>
+            </button>
+            <a href="/login.html" class="mobile-header-btn" id="mobile-top-account-btn" aria-label="Account" title="Account">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <h1 class="main-header-title">Explore</h1>
+      </header>
+
+      <!-- Explore Container -->
+      <div class="explore-container">
+        <!-- Explore Hero Box -->
+        <div class="explore-hero-box">
+          <h1 class="explore-page-title">Explore Community</h1>
+          <p class="explore-page-subtitle">Discover active creators, developers, and engineers across the network.</p>
+        </div>
+
+        <!-- Search Input with Icon & Real-time Debounce -->
+        <div class="explore-search-wrap">
+          <div class="explore-search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input type="search" id="explore-search-input" class="explore-search-input" placeholder="Search by name or @username..." autocomplete="off" aria-label="Search people">
+        </div>
+
+        <!-- Users Grid -->
+        <div id="users-grid" class="explore-users-grid" aria-live="polite">
+          <div class="center-spinner" style="grid-column: 1 / -1;"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="app-sidebar-right" aria-label="Sidebar Recommendations">
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Community Highlights</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+          Connect with creators and developers across the platform. Follow accounts to see their thoughts in your personal Following feed.
+        </p>
+      </div>
+
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Popular Topics</span>
+        </div>
+        <div class="trending-tags-wrap">
+          <a href="/explore.html?q=FullStack" class="trending-tag-item">
+            <span class="tag-label">#FullStack</span>
+            <span class="tag-posts-count">Web developers</span>
+          </a>
+          <a href="/explore.html?q=PostgreSQL" class="trending-tag-item">
+            <span class="tag-label">#PostgreSQL</span>
+            <span class="tag-posts-count">SQL architecture</span>
+          </a>
+          <a href="/explore.html?q=Vercel" class="trending-tag-item">
+            <span class="tag-label">#Vercel</span>
+            <span class="tag-posts-count">Cloud hosting</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <!-- Rendered dynamically by /js/auth.js -->
+  </nav>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/follow.js"></script>
+  <script>
+    let searchTimeout = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialQuery = urlParams.get('q') || '';
+      const searchInput = document.getElementById('explore-search-input');
+
+      if (searchInput && initialQuery) {
+        searchInput.value = initialQuery;
+      }
+
+      loadUsers(initialQuery);
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          clearTimeout(searchTimeout);
+          const query = e.target.value.trim();
+          searchTimeout = setTimeout(() => {
+            loadUsers(query);
+          }, 250);
+        });
+      }
+    });
+
+    async function loadUsers(query = '') {
+      const grid = document.getElementById('users-grid');
+      if (!grid) return;
+
+      grid.innerHTML = '<div class="center-spinner" style="grid-column: 1 / -1;"><div class="loading-spinner"></div></div>';
+
+      try {
+        const url = query ? `/api/users/search?q=${encodeURIComponent(query)}` : '/api/users';
+        const res = await apiFetch(url);
+
+        if (res.ok && res.data.success) {
+          const users = res.data.data;
+          const currentUser = getCurrentUser();
+
+          if (users.length === 0) {
+            grid.innerHTML = `
+              <div class="empty-state" style="grid-column: 1 / -1;">
+                <div class="empty-state-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <h3 class="empty-state-title">No users found</h3>
+                <p class="empty-state-desc">No accounts match "${escapeHtml(query)}". Try another search keyword.</p>
+              </div>
+            `;
+            return;
+          }
+
+          grid.innerHTML = users.map(u => {
+            const isMe = currentUser && currentUser.id === u.id;
+            const avatarUrl = u.profile_image || `https://api.dicebear.com/7.x/bottts/svg?seed=${u.username}`;
+
+            return `
+              <div class="explore-user-card" id="user-card-${u.id}">
+                <div class="explore-card-top"></div>
+                <div class="explore-card-body">
+                  <img src="${avatarUrl}" alt="${escapeHtml(u.name)}" class="explore-card-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=user'">
+                  <a href="/profile.html?username=${encodeURIComponent(u.username)}" class="explore-card-name">
+                    ${escapeHtml(u.name || u.username)}
+                  </a>
+                  <div class="explore-card-handle">@${escapeHtml(u.username)}</div>
+                  <p class="explore-card-bio">${escapeHtml(u.bio || 'Passionate creator & developer.')}</p>
+
+                  <div class="explore-card-stats">
+                    <span><strong data-user-followers="${u.id}">${u.followers_count || 0}</strong> followers</span>
+                    <span><strong>${u.following_count || 0}</strong> following</span>
+                  </div>
+
+                  <div class="explore-card-actions">
+                    <a href="/profile.html?username=${encodeURIComponent(u.username)}" class="btn btn-outline btn-sm" style="flex: 1;">View Profile</a>
+                    ${isMe ? `
+                      <span class="btn btn-outline btn-sm" style="opacity: 0.6; cursor: default;">You</span>
+                    ` : currentUser ? `
+                      <button class="btn btn-follow btn-sm ${u.is_following ? 'following' : ''}" data-user-id="${u.id}" data-following="${u.is_following ? 'true' : 'false'}">
+                        ${u.is_following ? 'Following' : 'Follow'}
+                      </button>
+                    ` : `
+                      <a href="/login.html" class="btn btn-primary btn-sm">Follow</a>
+                    `}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          if (typeof bindFollowButtons === 'function') {
+            bindFollowButtons(grid);
+          }
+        } else {
+          grid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><p style="color: var(--danger);">Failed to load users.</p></div>';
+        }
+      } catch (err) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><p style="color: var(--danger);">Network error loading users.</p></div>';
+      }
+    }
+  </script>
+</body>
+</html>
