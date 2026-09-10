@@ -1162,6 +1162,70 @@ app.get('/api/users/search', optionalAuth, async (req, res) => {
   }
 });
 
+// GET /api/users/explore (Suggested users for sidebar widget)
+app.get('/api/users/explore', optionalAuth, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const currentUserId = req.user ? req.user.id : null;
+
+    let usersRes;
+    if (currentUserId) {
+      usersRes = await query(
+        `SELECT id, username, email, name, bio, profile_image, created_at
+         FROM users
+         WHERE id != $1
+         ORDER BY id DESC
+         LIMIT $2`,
+        [currentUserId, limit]
+      );
+    } else {
+      usersRes = await query(
+        `SELECT id, username, email, name, bio, profile_image, created_at
+         FROM users
+         ORDER BY id DESC
+         LIMIT $1`,
+        [limit]
+      );
+    }
+
+    const users = await enrichUsers(usersRes.rows, currentUserId);
+    return res.json({
+      success: true,
+      data: users
+    });
+  } catch (err) {
+    console.error('Explore users error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch suggested users.'
+    });
+  }
+});
+
+// GET /api/explore (Alias for general explore feed)
+app.get('/api/explore', optionalAuth, async (req, res) => {
+  try {
+    const currentUserId = req.user ? req.user.id : null;
+    const usersRes = await query(
+      `SELECT id, username, email, name, bio, profile_image, created_at
+       FROM users
+       ORDER BY id DESC
+       LIMIT 20`
+    );
+    const users = await enrichUsers(usersRes.rows, currentUserId);
+    return res.json({
+      success: true,
+      data: { users }
+    });
+  } catch (err) {
+    console.error('Explore error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch explore data.'
+    });
+  }
+});
+
 // GET /api/users/:username
 app.get('/api/users/:username', optionalAuth, async (req, res) => {
   try {
