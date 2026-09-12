@@ -226,3 +226,10 @@ All endpoints return uniform JSON responses: `{ "success": true, "data": ... }` 
 ├── server.js             # Local development server entry point
 └── vercel.json           # Vercel serverless deployment routing
 ```
+
+* ## 👩‍💻 Author
+
+**Fatima Javed**
+
+BS Computer Science Student
+Aspiring Full-Stack Developer
