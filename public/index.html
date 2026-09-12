@@ -231,15 +231,15 @@
     <!-- RIGHT SIDEBAR: Discover, Suggested People & Architecture Status -->
     <aside class="app-sidebar-right" aria-label="Social Recommendations">
       <!-- Database & Serverless Architecture Status -->
-      <div class="sidebar-widget">
+      <div class="sidebar-widget" id="infra-widget">
         <div class="widget-title">
           <span>Infrastructure</span>
-          <div class="db-status-badge">
-            <span class="db-status-dot"></span> Online
+          <div class="db-status-badge" id="infra-status-badge">
+            <span class="db-status-dot" id="infra-status-dot"></span> <span id="infra-status-text">Connecting...</span>
           </div>
         </div>
-        <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
-          PostgreSQL database active with dynamic local memory fallback. Vercel Blob ready for production deployments.
+        <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;" id="infra-desc-text">
+          Checking backend database status...
         </p>
       </div>
 

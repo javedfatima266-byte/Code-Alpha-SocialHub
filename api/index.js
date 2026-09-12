@@ -23,7 +23,11 @@ const devTransientSecret = crypto.randomBytes(32).toString('hex');
 const JWT_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || devTransientSecret;
 
 if (!process.env.SESSION_SECRET && !process.env.JWT_SECRET) {
-  console.log('ℹ️  No SESSION_SECRET environment variable provided. Using dynamic runtime secret for development. Production secrets can be configured in Vercel settings.');
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+    console.warn('⚠️ WARNING: Neither SESSION_SECRET nor JWT_SECRET is configured in production environment. Tokens may invalidate across serverless cold starts. Set SESSION_SECRET in Vercel Project Settings > Environment Variables.');
+  } else {
+    console.log('ℹ️  No SESSION_SECRET environment variable provided. Using dynamic runtime secret for development.');
+  }
 }
 
 const app = express();
@@ -36,6 +40,43 @@ app.use(cors({
 app.use(express.json({ limit: '12mb' }));
 app.use(express.urlencoded({ limit: '12mb', extended: true }));
 app.use(cookieParser());
+
+// Vercel Serverless Function & Reverse Proxy URL Normalization Middleware
+// Ensures req.url accurately reflects the requested API route regardless of Vercel edge rewrites
+app.use((req, res, next) => {
+  // Check Vercel edge and reverse proxy matched path headers FIRST
+  const matchedHeader = req.headers['x-matched-path'] ||
+                        req.headers['x-vercel-matched-path'] ||
+                        req.headers['x-forwarded-uri'] ||
+                        req.headers['x-original-uri'];
+
+  if (matchedHeader && matchedHeader.startsWith('/api')) {
+    const qIndex = req.url.indexOf('?');
+    const queryString = (qIndex !== -1 && !matchedHeader.includes('?')) ? req.url.slice(qIndex) : '';
+    req.url = matchedHeader + queryString;
+  } else {
+    // If request arrived without /api prefix (e.g. from reverse proxy or direct serverless invocation)
+    const [pathname, search] = req.url.split('?');
+    const qs = search ? `?${search}` : '';
+
+    if (!pathname.startsWith('/api')) {
+      if (
+        pathname.startsWith('/auth') ||
+        pathname.startsWith('/posts') ||
+        pathname.startsWith('/comments') ||
+        pathname.startsWith('/users') ||
+        pathname.startsWith('/upload') ||
+        pathname.startsWith('/health') ||
+        pathname.startsWith('/status') ||
+        pathname.startsWith('/explore')
+      ) {
+        req.url = `/api${pathname.startsWith('/') ? '' : '/'}${pathname}${qs}`;
+      }
+    }
+  }
+
+  next();
+});
 
 // Serve static assets from public/ folder in standalone/dev mode
 app.use(express.static(path.join(process.cwd(), 'public')));
@@ -190,7 +231,7 @@ async function enrichUsers(userRows, currentUserId) {
 // ==========================================
 
 // POST /api/auth/register
-app.post('/api/auth/register', async (req, res) => {
+app.post(['/api/auth/register', '/auth/register'], async (req, res) => {
   try {
     const { username, email, password, name } = req.body;
     const confirmPassword = req.body.confirmPassword || password;
@@ -301,7 +342,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-app.post('/api/auth/login', async (req, res) => {
+app.post(['/api/auth/login', '/auth/login'], async (req, res) => {
   try {
     const rawIdentifier = req.body.emailOrUsername || req.body.email || req.body.username || req.body.identifier;
     const { password } = req.body;
@@ -378,7 +419,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // POST /api/auth/logout
-app.post('/api/auth/logout', (req, res) => {
+app.post(['/api/auth/logout', '/auth/logout'], (req, res) => {
   res.clearCookie('token');
   return res.json({
     success: true,
@@ -387,7 +428,7 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 // GET /api/auth/me
-app.get('/api/auth/me', requireAuth, async (req, res) => {
+app.get(['/api/auth/me', '/auth/me'], requireAuth, async (req, res) => {
   try {
     const userRes = await query(
       'SELECT id, username, email, name, bio, profile_image, created_at FROM users WHERE id = $1',
@@ -484,7 +525,7 @@ app.get('/api/posts', optionalAuth, async (req, res) => {
 
 // Health check endpoint for platform monitoring
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // POST /api/posts
@@ -1173,7 +1214,7 @@ app.get('/api/users/explore', optionalAuth, async (req, res) => {
       usersRes = await query(
         `SELECT id, username, email, name, bio, profile_image, created_at
          FROM users
-         WHERE id != $1
+         WHERE id != $1 AND id NOT IN (SELECT following_id FROM follows WHERE follower_id = $1)
          ORDER BY id DESC
          LIMIT $2`,
         [currentUserId, limit]
@@ -1314,10 +1355,13 @@ app.put('/api/users/:id', requireAuth, async (req, res) => {
 
 // Status endpoint
 app.get('/api/status', (req, res) => {
+  const inMem = isDbInMemory();
   res.json({
     success: true,
     message: 'SocialHub API is operational',
-    database: isDbInMemory() ? 'In-Memory PostgreSQL (Preview mode)' : 'PostgreSQL Cloud Database (Connected)',
+    is_memory: inMem,
+    database: inMem ? 'In-Memory PostgreSQL (Preview mode)' : 'PostgreSQL Cloud Database (Connected)',
+    environment: (process.env.NODE_ENV === 'production' || process.env.VERCEL) ? 'production' : 'development',
     timestamp: new Date().toISOString()
   });
 });

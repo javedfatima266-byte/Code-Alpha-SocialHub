@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFeedFilters();
   loadFeed();
   loadSuggestedPeople();
+  loadInfrastructureStatus();
 
   // Focus composer if URL has ?focus=composer
   if (window.location.search.includes('focus=composer')) {
@@ -367,35 +368,90 @@ async function loadSuggestedPeople() {
 
   try {
     const res = await apiFetch('/api/users/explore?limit=4');
-    if (res.ok && res.data.success) {
-      const users = res.data.data.filter(u => !user || u.id !== user.id).slice(0, 4);
+
+    if (res.ok && res.data && res.data.success) {
+      const allUsers = Array.isArray(res.data.data) ? res.data.data : [];
+      // Exclude current user and already followed users
+      const users = allUsers.filter(u => (!user || u.id !== user.id) && !u.is_following).slice(0, 4);
 
       if (users.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No suggestions available right now.</p>';
+        container.innerHTML = `
+          <div style="padding: 0.75rem 0; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+            No suggestions available right now.
+          </div>
+        `;
         return;
       }
 
       container.innerHTML = users.map(u => {
         const avatarUrl = u.profile_image || `https://api.dicebear.com/7.x/bottts/svg?seed=${u.username}`;
         return `
-          <div class="user-mini-card">
+          <div class="user-mini-card" id="suggested-user-${u.id}">
             <a href="/profile.html?username=${encodeURIComponent(u.username)}" class="user-mini-link">
-              <img src="${avatarUrl}" alt="${escapeHtml(u.name)}" class="user-mini-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=user'">
+              <img src="${avatarUrl}" alt="${escapeHtml(u.name || u.username)}" class="user-mini-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=user'">
               <div class="user-mini-details">
                 <div class="user-mini-name">${escapeHtml(u.name || u.username)}</div>
                 <div class="user-mini-handle">@${escapeHtml(u.username)}</div>
               </div>
             </a>
-            <button class="btn-follow ${u.is_following ? 'following' : ''}" data-user-id="${u.id}" data-following="${u.is_following ? 'true' : 'false'}">
-              ${u.is_following ? 'Following' : 'Follow'}
+            <button class="btn-follow" data-user-id="${u.id}" data-following="false" id="follow-btn-${u.id}">
+              Follow
             </button>
           </div>
         `;
       }).join('');
 
       bindFollowButtons(container);
+    } else {
+      container.innerHTML = `
+        <div style="padding: 0.75rem 0; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+          No suggestions available right now.
+        </div>
+      `;
     }
   } catch (err) {
     console.warn('Could not load suggested people:', err);
+    container.innerHTML = `
+      <div style="padding: 0.75rem 0; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+        Suggestions temporarily unavailable.
+      </div>
+    `;
   }
 }
+
+// --------------------------------------------------------------------------
+// Truthful Live Infrastructure Status
+// --------------------------------------------------------------------------
+async function loadInfrastructureStatus() {
+  const badge = document.getElementById('infra-status-badge');
+  const dot = document.getElementById('infra-status-dot');
+  const statusText = document.getElementById('infra-status-text');
+  const descText = document.getElementById('infra-desc-text');
+
+  if (!badge || !descText) return;
+
+  try {
+    const res = await apiFetch('/api/status');
+    if (res.ok && res.data && res.data.success) {
+      const isMem = !!res.data.is_memory || (res.data.database && res.data.database.includes('In-Memory'));
+      if (isMem) {
+        if (statusText) statusText.textContent = 'Development';
+        if (dot) dot.style.backgroundColor = '#f59e0b'; // Amber for dev emulator
+        descText.textContent = 'Development environment active with local PostgreSQL emulator.';
+      } else {
+        if (statusText) statusText.textContent = 'Connected';
+        if (dot) dot.style.backgroundColor = '#10b981'; // Green for live PostgreSQL
+        descText.textContent = 'Production PostgreSQL database connected and active on Vercel Serverless.';
+      }
+    } else {
+      if (statusText) statusText.textContent = 'Degraded';
+      if (dot) dot.style.backgroundColor = '#ef4444';
+      descText.textContent = 'Database health check reported degraded connectivity.';
+    }
+  } catch (err) {
+    if (statusText) statusText.textContent = 'Offline';
+    if (dot) dot.style.backgroundColor = '#ef4444';
+    descText.textContent = 'Unable to reach backend API. Check serverless function status.';
+  }
+}
+

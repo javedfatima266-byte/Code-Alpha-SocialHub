@@ -7,6 +7,7 @@ import pg from 'pg';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { SCHEMA_SQL } from './schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +17,7 @@ const { Pool } = pg;
 let pool;
 let isInMemory = false;
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
 
 if (databaseUrl && databaseUrl.trim() !== '') {
   console.log('Connecting to PostgreSQL via DATABASE_URL...');
@@ -32,18 +33,23 @@ if (databaseUrl && databaseUrl.trim() !== '') {
     console.error('Unexpected error on idle PostgreSQL client:', err);
   });
 } else {
+  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+  if (isProduction) {
+    throw new Error(
+      'CRITICAL DATABASE CONFIGURATION ERROR: Running in production environment (VERCEL or NODE_ENV=production) without a PostgreSQL connection string. ' +
+      'In-memory databases cannot be used in production because serverless instances are stateless. ' +
+      'Please set DATABASE_URL or POSTGRES_URL in your Vercel Project Settings > Environment Variables.'
+    );
+  }
+
   console.log('ℹ️  No DATABASE_URL environment variable provided. Initializing in-memory PostgreSQL emulator (pg-mem) for development...');
   isInMemory = true;
   const { newDb } = await import('pg-mem');
   const memDb = newDb();
 
   try {
-    const schemaPath = path.join(process.cwd(), 'db/schema.sql');
-    if (fs.existsSync(schemaPath)) {
-      const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-      memDb.public.none(schemaSql);
-      console.log('In-memory PostgreSQL schema applied.');
-    }
+    memDb.public.none(SCHEMA_SQL);
+    console.log('In-memory PostgreSQL schema applied.');
 
     const seedPath = path.join(process.cwd(), 'db/seed.sql');
     if (fs.existsSync(seedPath)) {
@@ -59,24 +65,31 @@ if (databaseUrl && databaseUrl.trim() !== '') {
   pool = new PgPool();
 }
 
-// Auto-run schema migrations on real Postgres if connected
-let initialized = false;
-export async function initDb() {
-  if (initialized) return;
-  initialized = true;
+// Auto-run schema migrations on real Postgres (e.g. Neon, Supabase) if connected
+let isInitialized = false;
+let initPromise = null;
 
-  if (!isInMemory && pool) {
-    try {
-      const schemaPath = path.join(process.cwd(), 'db/schema.sql');
-      if (fs.existsSync(schemaPath)) {
-        const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-        await pool.query(schemaSql);
-        console.log('PostgreSQL tables and constraints verified/created.');
+export async function initDb() {
+  if (isInitialized) return;
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    if (!isInMemory && pool) {
+      try {
+        await pool.query(SCHEMA_SQL);
+        console.log('PostgreSQL tables, foreign keys, and indexes verified/created successfully.');
+        isInitialized = true;
+      } catch (err) {
+        console.error('PostgreSQL schema initialization error:', err.message);
+        initPromise = null;
+        throw err;
       }
-    } catch (err) {
-      console.error('Schema initialization notice:', err.message);
+    } else {
+      isInitialized = true;
     }
-  }
+  })();
+
+  return initPromise;
 }
 
 // Helper query function with parameter binding

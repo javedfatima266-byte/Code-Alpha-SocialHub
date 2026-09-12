@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "node --check server.js api/index.js api/db.js",
-    "lint": "node --check server.js api/index.js api/db.js"
+    "build": "node --check server.js api/index.js api/db.js api/schema.js api/posts.js api/users.js api/comments.js api/upload.js api/status.js api/health.js api/auth/register.js api/auth/login.js api/auth/logout.js api/auth/me.js",
+    "lint": "node --check server.js api/index.js api/db.js api/schema.js api/posts.js api/users.js api/comments.js api/upload.js api/status.js api/health.js api/auth/register.js api/auth/login.js api/auth/logout.js api/auth/me.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
