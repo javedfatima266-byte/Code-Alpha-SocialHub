@@ -11,7 +11,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { query, isDbInMemory } from './db.js';
+import { query, isDbInMemory } from '../lib/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,18 +44,19 @@ app.use(cookieParser());
 // Vercel Serverless Function & Reverse Proxy URL Normalization Middleware
 // Ensures req.url accurately reflects the requested API route regardless of Vercel edge rewrites
 app.use((req, res, next) => {
-  // Check Vercel edge and reverse proxy matched path headers FIRST
-  const matchedHeader = req.headers['x-matched-path'] ||
+  // Check Vercel edge and reverse proxy matched path headers
+  const matchedHeader = req.headers['x-forwarded-uri'] ||
+                        req.headers['x-matched-path'] ||
                         req.headers['x-vercel-matched-path'] ||
-                        req.headers['x-forwarded-uri'] ||
                         req.headers['x-original-uri'];
 
-  if (matchedHeader && matchedHeader.startsWith('/api')) {
+  // If Vercel rewrote the destination to /api or /api/, restore full original path from headers
+  if (matchedHeader && matchedHeader.startsWith('/api') && (req.url === '/' || req.url === '/api' || req.url === '/api/' || req.url.startsWith('/api?'))) {
     const qIndex = req.url.indexOf('?');
     const queryString = (qIndex !== -1 && !matchedHeader.includes('?')) ? req.url.slice(qIndex) : '';
     req.url = matchedHeader + queryString;
   } else {
-    // If request arrived without /api prefix (e.g. from reverse proxy or direct serverless invocation)
+    // If request arrived without /api prefix (e.g. from reverse proxy or internal rewrite)
     const [pathname, search] = req.url.split('?');
     const qs = search ? `?${search}` : '';
 
@@ -76,6 +77,22 @@ app.use((req, res, next) => {
   }
 
   next();
+});
+
+// Base /api status route
+app.get(['/api', '/api/'], (req, res) => {
+  res.json({
+    success: true,
+    name: 'SocialHub API',
+    status: 'operational',
+    endpoints: {
+      auth: '/api/auth',
+      posts: '/api/posts',
+      users: '/api/users',
+      status: '/api/status',
+      health: '/api/health'
+    }
+  });
 });
 
 // Serve static assets from public/ folder in standalone/dev mode
