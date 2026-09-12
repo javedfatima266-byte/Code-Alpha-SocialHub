@@ -167,8 +167,17 @@ async function loadUserPosts(username, container) {
 
   try {
     const res = await apiFetch(`/api/posts?username=${encodeURIComponent(username)}`);
-    if (res.ok && res.data.success) {
-      const posts = res.data.data;
+    const isSuccess = res.ok && res.data && (res.data.success !== false);
+    if (isSuccess) {
+      let posts = [];
+      if (Array.isArray(res.data)) {
+        posts = res.data;
+      } else if (res.data && Array.isArray(res.data.posts)) {
+        posts = res.data.posts;
+      } else if (res.data && Array.isArray(res.data.data)) {
+        posts = res.data.data;
+      }
+
       if (posts.length === 0) {
         container.innerHTML = `
           <div class="empty-state">

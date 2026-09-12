@@ -169,22 +169,33 @@ export async function optionalAuth(req, res, next) {
 // Helper: Enrich post rows with counts, like state, and ownership
 async function enrichPosts(postRows, currentUserId) {
   if (!postRows || postRows.length === 0) return [];
-  const likesRes = await query('SELECT post_id, user_id FROM likes');
-  const commentsRes = await query('SELECT post_id, id FROM comments');
-
+  const postIds = postRows.map(r => r.id);
   const likeCounts = {};
   const userLikes = new Set();
-  likesRes.rows.forEach(r => {
-    likeCounts[r.post_id] = (likeCounts[r.post_id] || 0) + 1;
-    if (currentUserId && r.user_id === currentUserId) {
-      userLikes.add(r.post_id);
-    }
-  });
-
   const commentCounts = {};
-  commentsRes.rows.forEach(r => {
-    commentCounts[r.post_id] = (commentCounts[r.post_id] || 0) + 1;
-  });
+
+  try {
+    const placeholders = postIds.map((_, i) => `$${i + 1}`).join(',');
+    const likesRes = await query(`SELECT post_id, user_id FROM likes WHERE post_id IN (${placeholders})`, postIds);
+    likesRes.rows.forEach(r => {
+      likeCounts[r.post_id] = (likeCounts[r.post_id] || 0) + 1;
+      if (currentUserId && Number(r.user_id) === Number(currentUserId)) {
+        userLikes.add(r.post_id);
+      }
+    });
+  } catch (err) {
+    console.error('Error enriching post likes:', err);
+  }
+
+  try {
+    const placeholders = postIds.map((_, i) => `$${i + 1}`).join(',');
+    const commentsRes = await query(`SELECT post_id, id FROM comments WHERE post_id IN (${placeholders})`, postIds);
+    commentsRes.rows.forEach(r => {
+      commentCounts[r.post_id] = (commentCounts[r.post_id] || 0) + 1;
+    });
+  } catch (err) {
+    console.error('Error enriching post comments:', err);
+  }
 
   return postRows.map(row => ({
     id: row.id,
@@ -195,7 +206,7 @@ async function enrichPosts(postRows, currentUserId) {
     like_count: likeCounts[row.id] || 0,
     comment_count: commentCounts[row.id] || 0,
     is_liked: userLikes.has(row.id),
-    is_owner: currentUserId ? (row.user_id === currentUserId) : false,
+    is_owner: currentUserId ? (Number(row.user_id) === Number(currentUserId)) : false,
     author: {
       id: row.user_id,
       username: row.username,
@@ -222,7 +233,7 @@ async function enrichUsers(userRows, currentUserId) {
   followsRes.rows.forEach(r => {
     followersCounts[r.following_id] = (followersCounts[r.following_id] || 0) + 1;
     followingCounts[r.follower_id] = (followingCounts[r.follower_id] || 0) + 1;
-    if (currentUserId && r.follower_id === currentUserId) {
+    if (currentUserId && Number(r.follower_id) === Number(currentUserId)) {
       userFollowing.add(r.following_id);
     }
   });
@@ -238,7 +249,7 @@ async function enrichUsers(userRows, currentUserId) {
     posts_count: postsCounts[row.id] || 0,
     followers_count: followersCounts[row.id] || 0,
     following_count: followingCounts[row.id] || 0,
-    is_me: currentUserId ? (row.id === currentUserId) : false,
+    is_me: currentUserId ? (Number(row.id) === Number(currentUserId)) : false,
     is_following: userFollowing.has(row.id)
   }));
 }
@@ -480,21 +491,24 @@ app.get(['/api/auth/me', '/auth/me'], requireAuth, async (req, res) => {
 // 2. POSTS ENDPOINTS
 // ==========================================
 
-// GET /api/posts
+// GET /api/posts and GET /api/posts/following
 // Query params: feed (following | all), username, user_id
-app.get('/api/posts', optionalAuth, async (req, res) => {
+app.get(['/api/posts', '/api/posts/following'], optionalAuth, async (req, res) => {
   try {
     const { feed, username, user_id } = req.query;
     const currentUserId = req.user ? req.user.id : null;
+    const isFollowingFeed = feed === 'following' || req.path.endsWith('/following');
 
     let sqlWhere = '';
     const params = [];
 
-    if (feed === 'following') {
+    if (isFollowingFeed) {
       if (!currentUserId) {
         return res.status(401).json({
           success: false,
-          message: 'Please log in to view posts from users you follow.'
+          message: 'Please log in to view posts from users you follow.',
+          posts: [],
+          data: []
         });
       }
       params.push(currentUserId);
@@ -529,13 +543,17 @@ app.get('/api/posts', optionalAuth, async (req, res) => {
 
     return res.json({
       success: true,
+      posts: posts,
       data: posts
     });
   } catch (err) {
     console.error('Fetch posts error:', err);
     return res.status(500).json({
       success: false,
-      message: 'Failed to fetch posts.'
+      message: 'Failed to fetch posts.',
+      posts: [],
+      data: [],
+      error: err.message || 'Database query error'
     });
   }
 });
@@ -693,9 +711,12 @@ app.post('/api/upload', requireAuth, async (req, res) => {
 });
 
 // GET /api/posts/:id
-app.get('/api/posts/:id', optionalAuth, async (req, res) => {
+app.get('/api/posts/:id', optionalAuth, async (req, res, next) => {
   try {
     const postId = parseInt(req.params.id);
+    if (isNaN(postId)) {
+      return next();
+    }
     const currentUserId = req.user ? req.user.id : null;
 
     const postRes = await query(
@@ -1249,6 +1270,7 @@ app.get('/api/users/explore', optionalAuth, async (req, res) => {
     const users = await enrichUsers(usersRes.rows, currentUserId);
     return res.json({
       success: true,
+      users: users,
       data: users
     });
   } catch (err) {

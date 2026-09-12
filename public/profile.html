@@ -184,20 +184,27 @@
     <aside class="app-sidebar-right" aria-label="Sidebar Recommendations">
       <div class="sidebar-widget">
         <div class="widget-title">
-          <span>Social Network</span>
-        </div>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
-          Profiles reflect real-time follower counts, published posts, and comments powered by PostgreSQL relations.
-        </p>
-      </div>
-
-      <div class="sidebar-widget">
-        <div class="widget-title">
           <span>Suggested Creators</span>
           <a href="/explore.html" style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Explore</a>
         </div>
         <div class="who-to-follow-list" id="who-to-follow-list">
           <div class="center-spinner" style="padding: 1rem;"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Explore SocialHub</span>
+        </div>
+        <div class="trending-tags-wrap">
+          <a href="/explore.html" class="trending-tag-item">
+            <span class="tag-label">🔍 Discover People</span>
+            <span class="tag-posts-count">Find creators to follow</span>
+          </a>
+          <a href="/index.html" class="trending-tag-item">
+            <span class="tag-label">📰 Home Feed</span>
+            <span class="tag-posts-count">Latest community discussions</span>
+          </a>
         </div>
       </div>
     </aside>

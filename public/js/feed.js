@@ -7,12 +7,27 @@ let selectedImageFile = null;
 let selectedImageDataUri = null;
 
 // Initialize Feed & Composer on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initPostComposer();
   initFeedFilters();
+
+  // Wait for session verification if in flight to avoid race conditions
+  if (window.authSessionReady) {
+    try {
+      const user = await window.authSessionReady;
+      if (user) {
+        const composerAvatar = document.getElementById('composer-user-avatar');
+        if (composerAvatar) {
+          composerAvatar.src = user.profile_image || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username}`;
+        }
+      }
+    } catch (e) {
+      // Continue anyway
+    }
+  }
+
   loadFeed();
   loadSuggestedPeople();
-  loadInfrastructureStatus();
 
   // Focus composer if URL has ?focus=composer
   if (window.location.search.includes('focus=composer')) {
@@ -313,15 +328,23 @@ async function loadFeed() {
 
   stream.innerHTML = renderSkeletonPostsHtml(3);
 
-  const endpoint = currentFilter === 'following' ? '/api/posts/following' : '/api/posts';
+  const endpoint = currentFilter === 'following' ? '/api/posts?feed=following' : '/api/posts';
 
   try {
     const res = await apiFetch(endpoint);
 
-    if (res.ok && res.data.success) {
-      const posts = res.data.data;
+    const isSuccess = res.ok && res.data && (res.data.success !== false);
+    if (isSuccess) {
+      let posts = [];
+      if (Array.isArray(res.data)) {
+        posts = res.data;
+      } else if (res.data && Array.isArray(res.data.posts)) {
+        posts = res.data.posts;
+      } else if (res.data && Array.isArray(res.data.data)) {
+        posts = res.data.data;
+      }
 
-      if (!posts || posts.length === 0) {
+      if (posts.length === 0) {
         const emptyMsg = currentFilter === 'following'
           ? 'You are not following anyone with posts yet. Discover people in Explore!'
           : 'No posts yet. Share something with the community!';
@@ -344,16 +367,23 @@ async function loadFeed() {
       stream.innerHTML = posts.map(post => createPostCardHtml(post)).join('');
       bindPostCardEvents(stream);
     } else {
+      console.warn('Feed load response:', res);
+      const errorMsg = (res.data && res.data.message) ? res.data.message : 'Failed to load posts. Please try again.';
       stream.innerHTML = `
         <div class="empty-state">
-          <p style="color: var(--danger);">Failed to load posts. Please try again.</p>
+          <p style="color: var(--danger); font-size: 0.95rem;">${escapeHtml(errorMsg)}</p>
           <button class="btn btn-outline btn-sm" onclick="loadFeed()" style="margin-top: 0.75rem;">Retry</button>
         </div>
       `;
     }
   } catch (err) {
     console.error('Feed error:', err);
-    stream.innerHTML = '<div class="empty-state"><p style="color: var(--danger);">Error loading feed.</p></div>';
+    stream.innerHTML = `
+      <div class="empty-state">
+        <p style="color: var(--danger); font-size: 0.95rem;">Error loading feed.</p>
+        <button class="btn btn-outline btn-sm" onclick="loadFeed()" style="margin-top: 0.75rem;">Retry</button>
+      </div>
+    `;
   }
 }
 
@@ -369,8 +399,16 @@ async function loadSuggestedPeople() {
   try {
     const res = await apiFetch('/api/users/explore?limit=4');
 
-    if (res.ok && res.data && res.data.success) {
-      const allUsers = Array.isArray(res.data.data) ? res.data.data : [];
+    if (res.ok && res.data && (res.data.success !== false)) {
+      let allUsers = [];
+      if (Array.isArray(res.data)) {
+        allUsers = res.data;
+      } else if (res.data && Array.isArray(res.data.users)) {
+        allUsers = res.data.users;
+      } else if (res.data && Array.isArray(res.data.data)) {
+        allUsers = res.data.data;
+      }
+
       // Exclude current user and already followed users
       const users = allUsers.filter(u => (!user || u.id !== user.id) && !u.is_following).slice(0, 4);
 
@@ -416,42 +454,6 @@ async function loadSuggestedPeople() {
         Suggestions temporarily unavailable.
       </div>
     `;
-  }
-}
-
-// --------------------------------------------------------------------------
-// Truthful Live Infrastructure Status
-// --------------------------------------------------------------------------
-async function loadInfrastructureStatus() {
-  const badge = document.getElementById('infra-status-badge');
-  const dot = document.getElementById('infra-status-dot');
-  const statusText = document.getElementById('infra-status-text');
-  const descText = document.getElementById('infra-desc-text');
-
-  if (!badge || !descText) return;
-
-  try {
-    const res = await apiFetch('/api/status');
-    if (res.ok && res.data && res.data.success) {
-      const isMem = !!res.data.is_memory || (res.data.database && res.data.database.includes('In-Memory'));
-      if (isMem) {
-        if (statusText) statusText.textContent = 'Development';
-        if (dot) dot.style.backgroundColor = '#f59e0b'; // Amber for dev emulator
-        descText.textContent = 'Development environment active with local PostgreSQL emulator.';
-      } else {
-        if (statusText) statusText.textContent = 'Connected';
-        if (dot) dot.style.backgroundColor = '#10b981'; // Green for live PostgreSQL
-        descText.textContent = 'Production PostgreSQL database connected and active on Vercel Serverless.';
-      }
-    } else {
-      if (statusText) statusText.textContent = 'Degraded';
-      if (dot) dot.style.backgroundColor = '#ef4444';
-      descText.textContent = 'Database health check reported degraded connectivity.';
-    }
-  } catch (err) {
-    if (statusText) statusText.textContent = 'Offline';
-    if (dot) dot.style.backgroundColor = '#ef4444';
-    descText.textContent = 'Unable to reach backend API. Check serverless function status.';
   }
 }
 

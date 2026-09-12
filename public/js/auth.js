@@ -612,24 +612,44 @@ function renderNavigation() {
 }
 
 // --------------------------------------------------------------------------
-// Initialization
+// Session Initialization & Synchronization Promise
 // --------------------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', async () => {
-  initTheme();
-  renderNavigation();
-  initLightbox();
+let resolveSessionInit;
+window.authSessionReady = new Promise((resolve) => {
+  resolveSessionInit = resolve;
+});
 
-  // Validate and refresh session silently if token exists
+async function initSession() {
   const token = getAuthToken();
   if (token) {
     try {
       const res = await apiFetch('/api/auth/me');
-      if (res.ok && res.data.success) {
-        setAuthSession(token, res.data.data.user);
+      if (res.ok && res.data && (res.data.success !== false)) {
+        const userData = res.data.data?.user || res.data.user || res.data.data;
+        if (userData) {
+          setAuthSession(token, userData);
+          renderNavigation();
+        }
+      } else if (res.status === 401) {
+        clearAuthSession();
         renderNavigation();
       }
     } catch (e) {
-      console.warn('Session refresh check failed:', e);
+      console.warn('Session verification notice:', e);
     }
   }
+
+  if (resolveSessionInit) {
+    resolveSessionInit(getCurrentUser());
+  }
+}
+
+// --------------------------------------------------------------------------
+// Initialization
+// --------------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  renderNavigation();
+  initLightbox();
+  initSession();
 });
